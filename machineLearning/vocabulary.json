@@ -1,0 +1,35 @@
+{"word_list": [
+    {"tag": "yes_words",
+     "words":["yes",
+              "yeah",
+              "yea",
+              "ok",
+              "okay",
+              "sure",
+              "fine"]
+    },{"tag": "no_words",
+     "words": ["no",
+               "nope",
+               "nah"]
+    },{"tag": "cancel_words",
+     "words": ["cancel",
+               "nevermind"]
+    },{"tag": "create_words",
+     "words":["create",
+              "new",
+              "add",
+              "make",
+              "set"]
+    },{"tag": "delete_words",
+      "words":["delete",
+               "remove",
+               "clear",
+               "cancel",
+               "erase"]
+    },{"tag": "show_words",
+      "words":["show",
+               "view",
+               "display"]
+    }
+  ]
+}

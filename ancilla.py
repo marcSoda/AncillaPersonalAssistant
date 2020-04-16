@@ -11,11 +11,13 @@ from ctypes import CFUNCTYPE, c_char_p, c_int, cdll
 from contextlib import contextmanager
 
 intent_path = "machineLearning/intents.json"
+vocab_path = "machineLearning/vocabulary.json"
 model_path = "machineLearning/model.h5"
 ding_path = "SnowboyDependencies/resources/ding.wav"
 dong_path = "SnowboyDependencies/resources/dong.wav"
 hotword_path = "SnowboyDependencies/Wumbo.pmdl"
 
+#Used to handle annoying alsa errors
 ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
 def py_error_handler(filename, line, function, err, fmt): pass
 c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
@@ -26,20 +28,41 @@ def no_alsa_error():
     yield
     asound.snd_lib_error_set_handler(None)
 
+#setup snowboy hotword detection
 with no_alsa_error():
     detector = snowboydecoder.HotwordDetector(hotword_path, sensitivity=0.42)
-def get_wav_data(self): #MONKEY-PATCH function
+def get_wav_data(self): #MONKEY-PATCH function because HotwordDetector.saveMessage is inneficient 
     data = b''.join(self.recordedData)
     return data
 snowboydecoder.HotwordDetector.saveMessage = get_wav_data
 
+#setup speech_recognition object
 r = sr.Recognizer()
 r.pause_threshold = 0.5 #seconds of non-speaking audio before a phrase is considered complete
 r.phrase_threshold = 0.2 #minimum seconds of speaking audio before we consider the speaking audio a phrase - values below this are ignored (for filtering out clicks and pops)
 r.non_speaking_duration = .3 # seconds of non-speaking audio to keep on both sides of the recording
 
+#setup pyttsx engine
 engine = pyttsx3.init("espeak")
 
+#prepare basic vocabulary for yes, no, and cancel
+yes_words = []
+no_words = []
+cancel_words = []
+with open(vocab_path) as file: #load json file (training data)
+    data = json.load(file)
+for word_list in data['word_list']:
+    if word_list['tag'] == 'yes_words':
+        for word in word_list['words']:
+            yes_words.append(word)
+    if word_list['tag'] == 'no_words':
+        for word in word_list['words']:
+            no_words.append(word)
+    if word_list['tag'] == 'cancel_words':
+        for word in word_list['words']:
+            cancel_words.append(word)
+
+#prepare machine learning model
 stopwords = nltk.corpus.stopwords.words('english')
 tokens = []
 tags = []
@@ -54,7 +77,6 @@ for intent in data['intents']:
         tags.append(intent['tag'])
 tokens = sorted(list(set(tokens)))
 tags = sorted(tags)
-
 model = tf.keras.models.load_model(model_path)
 
 def wait_for_command():
@@ -117,11 +139,10 @@ def get_intent(text):
     matrix = numpy.matrix(arr)
 
     results = model.predict([matrix])
-    print(numpy.round(results, 2))
     result_index = numpy.argmax(results)
     if results[0,result_index] > .7:
         tag = tags[result_index]
-        print(tag)
+        print(numpy.round(results, 2), tag)
         return tag
     else:
         return "I didn't get that"
@@ -138,24 +159,20 @@ def process(text):
                 label = rem.get_label()
                 say("Are you sure you want to set a reminder to " + label)
                 answer = get_text()
-                if answer == 'yes':
-                    rem.add_to_database()
-                    say("Reminder set")
-                else: #TODO: perhaps add a loop to rather than just exiting
-                    say("Reminder Not Set")
+                make_sure(rem, answer)
             else:
                 if not rem.has_label():
                     say("What is the reminder?")
                     label = get_text()
+                    # if label
                     say("Are you sure you want to set a reminder to " + label)
                     answer = get_text()
-                    if answer == 'yes':
-                        rem.add_to_database()
-                        say("Reminder set")
-                    else: #TODO: perhaps add a loop to rather than just exiting
-                        say("Reminder Not Set")
+                    make_sure(rem, answer)
         else: say("There was an error") #temporary
     wait_for_command()
+    
+def make_sure(task, ans): pass
+    
 
 wait_for_command()
 detector.terminate()
