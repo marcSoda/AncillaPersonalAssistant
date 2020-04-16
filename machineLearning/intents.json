@@ -1,0 +1,64 @@
+{"intents": [
+  {"tag": "reminder_create",
+    "patterns": ["remind me to *label",
+                "*create_word a reminder",
+                "*create_word new reminder",
+                "*create_word a reminder to *label"]
+  },
+  {"tag": "reminder_delete",
+    "patterns": ["*delete_word *label reminder"]
+  },
+  {"tag": "reminder_view_all",
+    "patterns": ["what are my reminders",
+                 "*show_word reminders"]
+  },
+  {"tag": "calendar_add_entry",
+    "patterns": ["*create_word new calendar entry",
+                "*create_word *label to calendar for *date",
+                "*create_word *label to calendar every *day_of_week"]
+  },
+  {"tag": "calendar_remove_entry",
+    "patterns": ["*delete_word *label from the calendar for *date"]  
+  },
+  {"tag": "calendar_view_entry",
+    "patterns": ["what is on the calendar for *date",
+                 "what do i have going on on *date",
+                 "*show_word "]
+  },
+  {"tag": "list_create",
+    "patterns": ["*create_word a list called *label"]
+  },
+  {"tag": "list_delete",
+    "patterns": ["*delete_word *label list"]
+  },
+  {"tag": "alarm_add",
+    "patterns": ["*create_word an alarm for *time_of_day",
+                "*create_word an alarm for *time_of_day every *day_of_week",
+                "*create_word an alarm for *time_of_day every day",
+                "*create_word a timer for *int *unit_of_time"]
+  },
+  {"tag": "alarm_delete",
+    "patterns": ["*delete_word alarm for *time_of_day",
+                "*delete_word *time_of_day alarm"]
+  },
+  {"tag": "alarm_view",
+    "patterns": ["what are my alarms", 
+                 "*show_word alarms"]
+  },
+  {"tag": "password_db",
+    "patterns": ["change my password for *password_name",
+                "create new password"]
+  },
+  {"tag": "power_set",
+    "patterns": ["turn off the *room_obj",
+                  "turn off *room_obj",
+                  "turn on the *room_obj",
+                  "turn on *room_obj"]
+  },
+  {"tag": "temp_set",
+    "patterns": ["set the temperature to *int degrees"]
+  },
+  {"tag": "device_control",
+     "patterns": []
+  }
+]}
