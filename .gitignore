@@ -1,10 +1,4 @@
-__pycache__/ancilla.cpython-37.pyc
-__pycache__/Interpreter.cpython-37.pyc
-__pycache__/interpreter.cpython-37.pyc
-__pycache__/snowboydecoder.cpython-37.pyc
-__pycache__/snowboydetect.cpython-37.pyc
-__pycache__/task_engine.cpython-37.pyc
-tests/machineLearningIntentsTest/machineLearningIntentsTest.py
-SnowboyDependencies/__pycache__/snowboydecoder_op.cpython-37.pyc
-SnowboyDependencies/__pycache__/snowboydecoder.cpython-37.pyc
-SnowboyDependencies/__pycache__/snowboydetect.cpython-37.pyc
+__pycache__/
+SnowboyDependencies/__pycache__/
+old/
+tests/
