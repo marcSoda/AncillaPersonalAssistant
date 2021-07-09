@@ -65,11 +65,3 @@ class Server:
             print("Server: Closed")
         except:
             print("Server: Failed to close")
-
-if __name__ == '__main__':
-    import time
-    s = Server("./socket")
-    s.connect()
-    while (1):
-        text = s.recvData()
-        s.sendData("Response from server: " + text)
