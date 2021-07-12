@@ -1,13 +1,13 @@
 #! /usr/bin/python3
 import pyttsx3
-from SnowboyDependencies import snowboydecoder_op as sb
+from snowboy import snowboydecoder_op as sb
 from controllers.Server import *
 import threading
 import select
 import time
 
 def listenForConnections():
-    while (1):
+    while 1:
         try:
             newClientName = server.listen()
             say("Initialized " + newClientName + " socket")
@@ -15,7 +15,7 @@ def listenForConnections():
             print("Exception in listenForConnections: " + repr(e))
 
 def listenForResponses():
-    while (1):
+    while 1:
         try:
             socket_list = server.clients.values()
             read_sockets, write_sockets, error_sockets = select.select(socket_list , [], [], .5)
@@ -35,19 +35,22 @@ def say(text):
 def detected_callback():
     sb.play_audio_file(ding_path)
     text = detector.get_stt()
-    server.sendData("bluetooth",text)
+    print("TEXT: " + text)
+    server.sendData("bluetooth", text)
     sb.play_audio_file(dong_path)
 
 #setup hotword detector
-ding_path = "SnowboyDependencies/resources/ding.wav"
-dong_path = "SnowboyDependencies/resources/dong.wav"
-hotword_path = "SnowboyDependencies/Wumbo.pmdl"
-detector = sb.HotwordDetector(decoder_model=hotword_path, sensitivity=.42)
+snowboy_resource_path = "./snowboy/resources/"
+ding_path = snowboy_resource_path + "ding.wav"
+dong_path = snowboy_resource_path + "dong.wav"
+hotword_path = snowboy_resource_path + "models/computer.umdl"
+detector = sb.HotwordDetector(decoder_model=hotword_path, sensitivity=.38, audio_gain=2)
 #setup pyttsx engine
 engine = pyttsx3.init()
-
+#setup server
 server = Server("/tmp/socket")
 server.bind()
+#setup threads
 connectionListener = threading.Thread(target=listenForConnections)
 connectionListener.start()
 responseListener = threading.Thread(target=listenForResponses)

@@ -1,20 +1,17 @@
 #!/usr/bin/env python
+from snowboy import snowboydetect
 import collections
-from SnowboyDependencies import snowboydetect
 import time
 import wave
 import os
 import logging
 import subprocess
 import threading
-import sys
 import json
 import io
 import sys
-import aifc
 import platform
 import stat
-import audioop
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
@@ -23,15 +20,11 @@ logging.basicConfig()
 logger = logging.getLogger("snowboy")
 logger.setLevel(logging.INFO)
 
-
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 TOP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 RESOURCE_FILE = os.path.join(TOP_DIR, "resources/common.res")
-DETECT_DING = os.path.join(TOP_DIR, "resources/ding.wav")
-DETECT_DONG = os.path.join(TOP_DIR, "resources/dong.wav")
-
 
 class RingBuffer(object):
     """Ring buffer to hold audio from audio capturing tool"""
@@ -52,7 +45,7 @@ class RingBuffer(object):
         self._buf.clear()
 
 
-def play_audio_file(fname=DETECT_DING):
+def play_audio_file(fname):
     os.system("aplay " + fname + " > /dev/null 2>&1")
 
 def get_wav_data(raw_data):
@@ -119,19 +112,18 @@ class HotwordDetector(object):
         self.init_recording()
 
     def record_proc(self):
-        while self.recording:
-            chunk = 2048
-            record_rate = 16000
+        chunk = 2048
+        record_rate = 16000
 
-            cmd = 'arecord --device=plughw:'+ str(self.AUDIO_CARD_NUMBER) + ',0 -q -r %d -f S16_LE' % record_rate
-            process = subprocess.Popen(cmd.split(' '),
-                                       stdout = subprocess.PIPE,
-                                       stderr = subprocess.PIPE)
-            wav = wave.open(process.stdout, 'rb')
-            while self.recording:
-                data = wav.readframes(chunk)
-                self.ring_buffer.extend(data)
-            process.terminate()
+        cmd = 'arecord --device=plughw:'+ str(self.AUDIO_CARD_NUMBER) + ',0 -q -r %d -f S16_LE' % record_rate
+        process = subprocess.Popen(cmd.split(' '),
+                                    stdout = subprocess.PIPE,
+                                    stderr = subprocess.PIPE)
+        wav = wave.open(process.stdout, 'rb')
+        while self.recording:
+            data = wav.readframes(chunk)
+            self.ring_buffer.extend(data)
+        process.terminate()
 
     def init_recording(self):
         """
@@ -197,10 +189,7 @@ class HotwordDetector(object):
                 self.silent_count = 0
                 self.begin_count = 0
                 self.begin = False
-                message = "Keyword " + str(status) + " detected at time: "
-                message += time.strftime("%Y-%m-%d %H:%M:%S",
-                                            time.localtime(time.time()))
-                logger.info(message)
+                logger.info("Hotword Detected")
                 callback = detected_callback[status-1]
                 if callback is not None:
                     callback()
