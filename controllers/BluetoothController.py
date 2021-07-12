@@ -1,6 +1,49 @@
 #! /usr/bin/python3
 
 import socket
+import threading
+import time
+
+#TODO: better error handling. throw exceptions, etc
+
+class DeviceManager:
+    devices = []
+    running = False
+    managerThread = None
+
+    def __init__(self):
+        self.run()
+
+    #start a thread for device management
+    def run(self):
+        self.running = True
+        self.managerThread = threading.Thread(target = self.ensureConnection)
+        self.managerThread.start()
+
+    def ensureConnection(self):
+        while 1:
+            disconnectedDevices = []
+            for device in self.devices:
+                if not device.checkConnection(): disconnectedDevices.append(device)
+            for device in disconnectedDevices:
+                device.reconnect()
+            time.sleep(4)
+
+    def getDisconnectedDevices(self):
+        disconnectedDevices = []
+        for device in self.devices:
+            if not device.connected: disconnectedDevices.append(device)
+        return disconnectedDevices
+
+    def add(self, device):
+        self.devices.append(device)
+
+    def destroy(self):
+        try:
+            for d in self.devices:
+                d.destroy()
+        except Exception as e:
+            print("DeviceManager.destroy(): ", repr(e))
 
 class Device:
     tags = []
@@ -19,9 +62,9 @@ class Device:
         except: self.checkConnection()
 
     def checkConnection(self):
-        try: self.socket.send(bytes("bump data", 'utf-8'))
+        try: self.socket.send(bytes("test", 'utf-8'))
         except Exception as e:
-            print(e, "in Device.checkConnection(self)") #SLOPPY FIX ENTIRE EXCEPT
+            print("Device: " + self.tags[0] + " is not connected.") #SLOPPY FIX ENTIRE EXCEPT
             self.connected = False
         return self.connected
 
@@ -38,7 +81,7 @@ class Device:
     def reconnect(self):
         print("attempting to reconnect ", self.tags[0])
         self.destroy()
-        self.connect()
+        return self.connect()
 
     def destroy(self):
         if self.connected:
