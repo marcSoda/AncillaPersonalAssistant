@@ -6,6 +6,8 @@ import threading
 import select
 import time
 
+import os
+
 def listenForConnections():
     while 1:
         try:
@@ -21,7 +23,7 @@ def listenForResponses():
             read_sockets, write_sockets, error_sockets = select.select(socket_list , [], [], .5)
             for s in read_sockets:
                 response = server.recvData(s)
-                if ("SIGKILL" in response): server.kill(s)
+                if ("SIGKILL" in response): kill(s)
                 else: say(response)
         except Exception as e:
             print("Exception in listenForResponses: " + repr(e))
@@ -33,29 +35,59 @@ def say(text):
         engine.runAndWait()
 
 def detected_callback():
-    sb.play_audio_file(ding_path)
-    text = detector.get_stt()
+    with lock: sb.play_audio_file(ding_path)
+    text = detector.get_stt().lower()
+    with lock: sb.play_audio_file(dong_path)
+    operate(text)
+
+def operate(text):
     print("TEXT: " + text)
-    server.sendData("bluetooth", text)
-    sb.play_audio_file(dong_path)
+    split = text.split(' ', 1) #split off the first word
+    if len(split) <= 1:
+        say("Invalid command length")
+        return
+    toSock = split[0]
+    command = split[1]
+
+    if toSock == "restart":
+        restart(command)
+        return
+    if toSock not in server.clients:
+        try: server.sendData("bluetooth", text)
+        except: say("Problem with bluetooth socket")
+        return
+    try: server.sendData(toSock, command)
+    except: say("Problem with " + toSock + " socket")
+
+def kill(clientSocketOrName):
+    deadClient = server.kill(clientSocketOrName)
+    say("Successfully killed " + deadClient + " socket")
+
+def restart(clientName):
+    if clientName in server.clients.keys():
+        kill(clientName)
+    os.system("sudo systemctl restart " + systemdClients[clientName])
 
 #setup hotword detector
 snowboy_resource_path = "./snowboy/resources/"
 ding_path = snowboy_resource_path + "ding.wav"
 dong_path = snowboy_resource_path + "dong.wav"
 hotword_path = snowboy_resource_path + "models/computer.umdl"
-detector = sb.HotwordDetector(decoder_model=hotword_path, sensitivity=.38, audio_gain=2)
+detector = sb.HotwordDetector(decoder_model=hotword_path, sensitivity=.48, audio_gain=2)
 #setup pyttsx engine
 engine = pyttsx3.init()
 #setup server
 server = Server("/tmp/socket")
-server.bind()
 #setup threads
 connectionListener = threading.Thread(target=listenForConnections)
 connectionListener.start()
 responseListener = threading.Thread(target=listenForResponses)
 responseListener.start()
 lock = threading.Lock()
+#systemd client service names
+systemdClients = {}
+systemdClients["bluetooth"] = "ancillaBluetooth.service"
+#MAYBE NEED LATER  BEFORE ExecStart ExecStartPre=/bin/sleep 10
 
 say("Initialized speech")
 detector.wait_for_hotword(detected_callback=detected_callback)

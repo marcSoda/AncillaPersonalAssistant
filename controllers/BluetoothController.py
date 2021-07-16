@@ -3,6 +3,7 @@
 import socket
 import threading
 import time
+import sys
 
 #TODO: better error handling. throw exceptions, etc
 
@@ -18,15 +19,19 @@ class DeviceManager:
     def run(self):
         self.running = True
         self.managerThread = threading.Thread(target = self.ensureConnection)
+        self.managerThread.daemon = True #kill thread when main thread closes
         self.managerThread.start()
 
     def ensureConnection(self):
         while 1:
             disconnectedDevices = []
-            for device in self.devices:
-                if not device.checkConnection(): disconnectedDevices.append(device)
-            for device in disconnectedDevices:
-                device.reconnect()
+            try:
+                for device in self.devices:
+                    if not device.checkConnection(): disconnectedDevices.append(device)
+                for device in disconnectedDevices:
+                    device.reconnect()
+            except Exception as e:
+                print("DeviceManager.ensureConnection(): " + repr(e))
             time.sleep(4)
 
     def getDisconnectedDevices(self):

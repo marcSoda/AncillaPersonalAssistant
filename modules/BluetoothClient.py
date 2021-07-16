@@ -1,6 +1,8 @@
 #! /usr/bin/python3
+
+import os
 import sys
-sys.path.append("../controllers")
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../controllers")
 from Client import *
 from BluetoothController import *
 
@@ -11,16 +13,19 @@ deviceManager = DeviceManager()
 deviceManager.add(Light(["light", "lamp"], lightAddr))
 
 socket = Client("bluetooth", "/tmp/socket")
-socket.connect()
 
 while (1):
     text = socket.recvData()
-
     if "status" in text:
         status = deviceManager.getDisconnectedDevices()
         if len(status) <= 0: socket.sendData("Bluetooth: green")
         for d in status: socket.sendData(d.tags[0] + " has lost connection")
         continue
+
+    if "kill" in text:
+        socket.sendData("SIGKILL")
+        socket.close()
+        sys.exit(0)
 
     for device in deviceManager.devices:
         for tag in device.tags:

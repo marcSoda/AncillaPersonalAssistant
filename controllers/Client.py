@@ -9,6 +9,7 @@ class Client:
     def __init__(self, name, serverAddress):
         self.serverAddress = serverAddress
         self.name = name
+        self.connect()
 
     def connect(self): #connect to server
         try:

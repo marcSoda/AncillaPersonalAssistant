@@ -10,6 +10,7 @@ class Server:
     def __init__(self, address):
         self.address = address
         if os.path.exists(address): os.unlink(address)
+        self.bind()
 
     def bind(self):
         try:
@@ -34,28 +35,32 @@ class Server:
     def sendData(self, clientName, command):
         self.clients[clientName].sendall(bytes(command, "utf-8"))
 
-    def recvData(self, clientName): #listen for response based on client name
+    def recvData(self, clientSocketOrName): #listen for response based on client socket or name
         #todo: receive data as a buffer rather than max 256 bytes
-        data = self.clients[clientName].recv(256)
-        return data.decode("utf-8")
-    def recvData(self, clientSocket): #listen for response based on clientsocket
-        #todo: receive data as a buffer rather than max 256 bytes
-        data = clientSocket.recv(256)
+        data = None
+        if clientSocketOrName in self.clients.keys():
+            data = self.clients[clientName].recv(256)
+        elif clientSocketOrName in self.clients.values():
+            data = clientSocketOrName.recv(256)
         return data.decode("utf-8")
 
-    def kill(self, clientName):
+    def getClientName(self, clientSocket):
+        return clientName
+
+    def kill(self, clientSocketOrName):
+        clientName = None
+        if clientSocketOrName in self.clients.keys():
+            clientName = clientSocketOrName
+        elif clientSocketOrName in self.clients.values():
+            clientName = list(self.clients.keys())[list(self.clients.values()).index(clientSocketOrName)]
+        else:
+            raise Exception("Socket does not exist in Socket.clients")
         try:
             self.clients[clientName].close()
             del self.clients[clientName]
         except Exception as e:
             print("Server.kill: Exception when attempting to kill client by client name"+ repr(e))
-    def kill(self, clientSocket):
-        try:
-            clientName = list(self.clients.keys())[list(self.clients.values()).index(clientSocket)]
-            self.clients[clientName].close()
-            del self.clients[clientName]
-        except Exception as e:
-            print("Server.kill: Exception when attempting to kill client by clientSocket"+ repr(e))
+        return clientName
 
     def close(self):
         try:
