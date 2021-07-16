@@ -1,5 +1,6 @@
 #! /usr/bin/python3
 
+import time
 import socket
 
 class Client:
@@ -9,17 +10,20 @@ class Client:
     def __init__(self, name, serverAddress):
         self.serverAddress = serverAddress
         self.name = name
-        self.connect()
+        while not self.connect():
+            print("Client.__init__(): Failed to connect. Trying again.")
+            time.sleep(1)
 
     def connect(self): #connect to server
         try:
             self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             self.socket.connect(self.serverAddress)
             self.sendData(self.name)
-            print("Client: Succussfully connected to server")
         except Exception as e:
-            print("Client: Failed to connect to server: " + repr(e))
             self.close
+            return False
+        print("Client: Succussfully connected to server")
+        return True
 
     def sendData(self, command):
         self.socket.send(bytes(command, "utf-8"))

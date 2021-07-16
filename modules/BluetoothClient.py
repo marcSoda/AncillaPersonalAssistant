@@ -9,10 +9,10 @@ from BluetoothController import *
 heaterAddr = '98:D3:41:FD:6B:EB'
 lightAddr = '00:20:02:20:06:B5'
 
+socket = Client("bluetooth", "/tmp/socket")
+
 deviceManager = DeviceManager()
 deviceManager.add(Light(["light", "lamp"], lightAddr))
-
-socket = Client("bluetooth", "/tmp/socket")
 
 while (1):
     text = socket.recvData()
@@ -25,7 +25,7 @@ while (1):
     if "kill" in text:
         socket.sendData("SIGKILL")
         socket.close()
-        sys.exit(0)
+        break
 
     for device in deviceManager.devices:
         for tag in device.tags:

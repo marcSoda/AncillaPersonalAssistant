@@ -11,6 +11,9 @@ def listenForConnections():
     while 1:
         try:
             newClientName = server.listen()
+            if newClientName == "":
+                say("Failed to initialize socket")
+                continue
             say("Initialized " + newClientName + " socket")
         except Exception as e:
             print("Exception in listenForConnections: " + repr(e))
@@ -51,11 +54,11 @@ def operate(text):
     if toSock == "start" or toSock == "restart":
         restart(command)
         return
-    if toSock not in server.clients:
+    if toSock not in server.clients.keys():
         toSock = "bluetooth"
     try: server.sendData(toSock, command)
     except:
-        say("Problem with " + toSock + " socket. Attempting to restart")
+        say("Problem with " + toSock + " socket. Attempting to restart.")
         restart(toSock)
 
 def kill(clientSocketOrName):
@@ -65,6 +68,9 @@ def kill(clientSocketOrName):
 def restart(clientName):
     if clientName in server.clients.keys():
         kill(clientName)
+    if clientName not in systemdClients.keys():
+        say(clientName + " is not a valid socket name.")
+        return
     os.system("sudo systemctl restart " + systemdClients[clientName])
 
 #setup hotword detector
@@ -86,6 +92,7 @@ lock = threading.Lock()
 #systemd client service names
 systemdClients = {}
 systemdClients["bluetooth"] = "ancillaBluetooth.service"
+systemdClients["alarm"] = "ancillaAlarm.service"
 
 say("Initialized speech")
 detector.wait_for_hotword(detected_callback=detected_callback)
