@@ -48,7 +48,7 @@ def operate(text):
     toSock = split[0]
     command = split[1]
 
-    if toSock == "restart":
+    if toSock == "start" or toSock == "restart":
         restart(command)
         return
     if toSock not in server.clients:
@@ -72,7 +72,7 @@ snowboy_resource_path = "./snowboy/resources/"
 ding_path = snowboy_resource_path + "ding.wav"
 dong_path = snowboy_resource_path + "dong.wav"
 hotword_path = snowboy_resource_path + "models/computer.umdl"
-detector = sb.HotwordDetector(decoder_model=hotword_path, sensitivity=.60, audio_gain=2)
+detector = sb.HotwordDetector(decoder_model=hotword_path, sensitivity=.50, audio_gain=2)
 #setup pyttsx engine
 engine = pyttsx3.init()
 #setup server
@@ -86,7 +86,6 @@ lock = threading.Lock()
 #systemd client service names
 systemdClients = {}
 systemdClients["bluetooth"] = "ancillaBluetooth.service"
-#MAYBE NEED LATER  BEFORE ExecStart ExecStartPre=/bin/sleep 10
 
 say("Initialized speech")
 detector.wait_for_hotword(detected_callback=detected_callback)

@@ -98,6 +98,19 @@ class Light(Device):
     def __init__(self, tags, macAddress, port=1):
         super().__init__(tags, macAddress, port)
 
+    def process(self, text):
+        tokens = text.split()
+        if "on" in text:
+            self.powerOn()
+            response = "Powerd on " + self.tags[0]
+        elif "off" in text:
+            self.powerOff()
+            response = "Powerd off " + self.tags[0]
+        else:
+            self.togglePower()
+            response = "Toggled power of " + self.tags[0]
+        return response
+
     def powerOn(self):
         self.send('1')
 

@@ -30,6 +30,6 @@ while (1):
     for device in deviceManager.devices:
         for tag in device.tags:
             if tag in text:
-                device.togglePower()
-                socket.sendData("Toggled power for " + tag)
+                response = device.process(text)
+                socket.sendData(response)
                 break
