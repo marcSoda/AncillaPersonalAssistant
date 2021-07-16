@@ -5,7 +5,6 @@ from controllers.Server import *
 import threading
 import select
 import time
-
 import os
 
 def listenForConnections():
@@ -53,11 +52,11 @@ def operate(text):
         restart(command)
         return
     if toSock not in server.clients:
-        try: server.sendData("bluetooth", text)
-        except: say("Problem with bluetooth socket")
-        return
+        toSock = "bluetooth"
     try: server.sendData(toSock, command)
-    except: say("Problem with " + toSock + " socket")
+    except:
+        say("Problem with " + toSock + " socket. Attempting to restart")
+        restart(toSock)
 
 def kill(clientSocketOrName):
     deadClient = server.kill(clientSocketOrName)
@@ -73,7 +72,7 @@ snowboy_resource_path = "./snowboy/resources/"
 ding_path = snowboy_resource_path + "ding.wav"
 dong_path = snowboy_resource_path + "dong.wav"
 hotword_path = snowboy_resource_path + "models/computer.umdl"
-detector = sb.HotwordDetector(decoder_model=hotword_path, sensitivity=.48, audio_gain=2)
+detector = sb.HotwordDetector(decoder_model=hotword_path, sensitivity=.60, audio_gain=2)
 #setup pyttsx engine
 engine = pyttsx3.init()
 #setup server
