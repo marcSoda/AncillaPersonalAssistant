@@ -78,7 +78,7 @@ snowboy_resource_path = "./snowboy/resources/"
 ding_path = snowboy_resource_path + "ding.wav"
 dong_path = snowboy_resource_path + "dong.wav"
 hotword_path = snowboy_resource_path + "models/computer.umdl"
-detector = sb.HotwordDetector(decoder_model=hotword_path, sensitivity=.50, audio_gain=2)
+detector = sb.HotwordDetector(decoder_model=hotword_path, sensitivity=.38, audio_gain=2)
 #setup pyttsx engine
 engine = pyttsx3.init()
 #setup server

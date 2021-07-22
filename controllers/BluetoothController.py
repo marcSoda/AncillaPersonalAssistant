@@ -119,22 +119,3 @@ class Light(Device):
 
     def togglePower(self):
         self.send('2')
-
-    #for bt thread
-    # def ensureConnection():
-    #     while devices:
-    #         unconnectedDevices = []
-    #         for device in devices:
-    #         if not device.checkConnection(): unconnectedDevices.append(device)
-    #         if unconnectedDevices:
-    #             for device in unconnectedDevices:
-    #                 print(device.tags[0], "is not connected")
-    #                 say("Attempting to reconnect" + device.tags[0])
-    #                 if device.reconnect():
-    #                     print(device.tags[0] + "reconnected")
-    #                     say(device.tags[0] + "reconnected")
-    #                 else: print("THIS IS PART OF A DEBUG. FAILED TO RECONNECT")
-    #         else: time.sleep(5)
-
-    # btcThread = threading.Thread(target=ensureConnection)
-    # btcThread.start()

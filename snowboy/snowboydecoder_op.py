@@ -122,6 +122,9 @@ class HotwordDetector(object):
         wav = wave.open(process.stdout, 'rb')
         while self.recording:
             data = wav.readframes(chunk)
+            if not data: #if there is no data (not sure why it happens, but it does). restart thread
+                self.recording = False
+                self.init_recording()
             self.ring_buffer.extend(data)
         process.terminate()
 
