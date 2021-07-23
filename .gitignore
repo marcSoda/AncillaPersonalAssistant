@@ -2,3 +2,5 @@ __pycache__/
 SnowboyDependencies/__pycache__/
 old/
 tests/
+alarm.wav
+alarms.pickle

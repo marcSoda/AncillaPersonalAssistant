@@ -26,6 +26,11 @@ def listenForResponses():
             for s in read_sockets:
                 response = server.recvData(s)
                 if ("SIGKILL" in response): kill(s)
+                elif ("SIGSEND" in response):
+                    print("HERE")
+                    st = response.split(' ', 1)[1]
+                    print(st)
+                    operate(st)
                 else: say(response)
         except Exception as e:
             print("Exception in listenForResponses: " + repr(e))

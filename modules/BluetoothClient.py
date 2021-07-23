@@ -18,7 +18,7 @@ while (1):
     text = socket.recvData()
     if "status" in text:
         status = deviceManager.getDisconnectedDevices()
-        if len(status) <= 0: socket.sendData("Bluetooth: green")
+        if len(status) <= 0: socket.sendData("Bluetooth is green")
         for d in status: socket.sendData(d.tags[0] + " has lost connection")
         continue
 
