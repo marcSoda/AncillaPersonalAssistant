@@ -124,6 +124,7 @@ class HotwordDetector(object):
             data = wav.readframes(chunk)
             if not data: #if there is no data (not sure why it happens, but it does). restart thread
                 self.recording = False
+                time.sleep(.5) #give thread time to exit so it doesn't get stuck in an infinite loop
                 self.init_recording()
             self.ring_buffer.extend(data)
         process.terminate()
@@ -134,6 +135,7 @@ class HotwordDetector(object):
         """
         self.recording = True
         self.record_thread = threading.Thread(target = self.record_proc)
+        self.record_thread.daemon = True #kill thread when main thread closes
         self.record_thread.start()
 
     def wait_for_hotword(self, detected_callback=play_audio_file,

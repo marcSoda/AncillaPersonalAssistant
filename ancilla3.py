@@ -27,7 +27,6 @@ def listenForResponses():
                 response = server.recvData(s)
                 if ("SIGKILL" in response): kill(s)
                 elif ("SIGSEND" in response):
-                    print("HERE")
                     st = response.split(' ', 1)[1]
                     print(st)
                     operate(st)
@@ -90,8 +89,10 @@ engine = pyttsx3.init()
 server = Server("/tmp/socket")
 #setup threads
 connectionListener = threading.Thread(target=listenForConnections)
+connectionListener.daemon = True #kill thread when main thread closes
 connectionListener.start()
 responseListener = threading.Thread(target=listenForResponses)
+responseListener.daemon = True #kill thread when main thread closes
 responseListener.start()
 lock = threading.Lock()
 #systemd client service names
