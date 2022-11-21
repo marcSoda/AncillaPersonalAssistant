@@ -20,8 +20,11 @@ while (1):
         alarmManager.addAlarm(tokens[1:])
     elif "delete" in tokens:
         alarmManager.deleteAlarm(tokens[1:])
+    elif "clear" in tokens:
+        alarmManager.clearAlarms()
     elif "stop" in tokens:
         alarmManager.stopAlarm()
+        socket.sendData("Alarm stopped")
     elif "list" in tokens:
         alarmManager.listAlarms()
     elif "kill" in tokens:

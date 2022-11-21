@@ -120,12 +120,17 @@ class HotwordDetector(object):
                                     stdout = subprocess.PIPE,
                                     stderr = subprocess.PIPE)
         wav = wave.open(process.stdout, 'rb')
+        wav.close()
         while self.recording:
             data = wav.readframes(chunk)
             if not data: #if there is no data (not sure why it happens, but it does). restart thread
-                self.recording = False
-                time.sleep(.5) #give thread time to exit so it doesn't get stuck in an infinite loop
-                self.init_recording()
+                # self.recording = False
+                print("NO DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print("NO DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print("NO DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                wav.close()
+                process.terminate()
+                return self.record_proc()
             self.ring_buffer.extend(data)
         process.terminate()
 
