@@ -6,7 +6,7 @@ import pickle
 
 repeat = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
-class AlarmManager:
+class AlarmController:
     alarms = {}
     running = False
     clockThread = None
@@ -36,10 +36,10 @@ class AlarmManager:
             currentAmpm = dtNow.strftime("%p").lower()
             currentDay = dtNow.strftime("%A").lower()
             for a in list(self.alarms.values()): #force a copy of the values to be made so there are no errors when iterating
-                if (    int(currentHour) == int(a.hour) and
-                        int(currentMinute) == int(a.minute) and
-                        currentAmpm == a.ampm and
-                        (currentDay in a.days or not a.repeat)):
+                if (int(currentHour) == int(a.hour) and
+                    int(currentMinute) == int(a.minute) and
+                    currentAmpm == a.ampm and
+                    (currentDay in a.days or not a.repeat)):
                     self.server.sendData("SIGSEND: bluetooth alarmlight on") #send a signal to the server to turn on all the lights with the 'alarmlight' tag
                     while not self.stop: #Until alarm is stopped, ring 3 times, wait 5 seconds, then repeat
                         for i in range(3): os.system("aplay ../alarm.wav > /dev/null 2>&1")

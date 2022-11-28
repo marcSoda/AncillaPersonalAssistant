@@ -9,7 +9,7 @@ from AlarmController import *
 
 socket = Client("alarm", "/tmp/socket")
 
-alarmManager = AlarmManager(socket)
+alarmManager = AlarmController(socket)
 
 while (1):
     text = socket.recvData()

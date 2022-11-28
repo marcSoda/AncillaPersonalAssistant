@@ -50,6 +50,12 @@ def operate(text):
     print("TEXT: " + text)
     split = text.split(' ', 1) #split off the first word
     if len(split) <= 1:
+        if (split[0] == "goodnight"):
+            say("What time would you like to wake up?")
+            operate("alarm set " + detector.get_stt().lower() + " wake up")
+            operate("turn off the light")
+            say("goodnight, handsome")
+            return
         say("Invalid command length")
         return
     toSock = split[0]
@@ -70,11 +76,15 @@ def kill(clientSocketOrName):
     say("Successfully killed " + deadClient + " socket")
 
 def restart(clientName):
+    print(clientName)
+    print(server.clients.keys())
+    print(systemdClients.keys())
     if clientName in server.clients.keys():
         kill(clientName)
     if clientName not in systemdClients.keys():
         say(clientName + " is not a valid socket name.")
         return
+    print("here")
     os.system("sudo systemctl restart " + systemdClients[clientName])
 
 #setup hotword detector
@@ -99,7 +109,8 @@ lock = threading.Lock()
 systemdClients = {}
 systemdClients["bluetooth"] = "ancillaBluetooth.service"
 systemdClients["alarm"] = "ancillaAlarm.service"
+systemdClients["search"] = "ancillaSearch.service"
 
-say("Initialized speech")
+say("Speech thread waiting")
 detector.wait_for_hotword(detected_callback=detected_callback)
 detector.terminate()
