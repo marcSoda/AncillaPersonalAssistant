@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import os
 import sys
 import datetime
@@ -19,4 +21,7 @@ while (1):
         socket.close()
         break
     else:
-        socket.sendData(searchMan.query(text))
+        try:
+            socket.sendData(searchMan.query(text))
+        except Exception as e:
+            socket.sendData("Search result contains no text data")

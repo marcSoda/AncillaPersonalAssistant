@@ -1,0 +1,17 @@
+- since snowboy was deprecated, there has been no way to train new models, but someone recently figured out how to do it
+* steps:
+-
+- record 3 audio files on the ancilla rpi which are used to train the model
+  - using `arecord --device=plughw:1,0 -r 16000 -f S16_LE fileX.wav`
+- scp them to local computer
+- clone [[https://github.com/rhasspy/snowboy-seasalt][this]] repo
+- run server with `docker run -it -p 8000:8000 rhasspy/snowboy-seasalt`
+- Generate the pmdl model file with:
+  - `curl \
+      -X POST \
+      -F modelName=okay-rhasspy \
+      -F example1=@file1.wav \
+      -F example2=@file2.wav \
+      -F example3=@file3.wav \
+      --output model.pmdl \
+      localhost:8000/generate`

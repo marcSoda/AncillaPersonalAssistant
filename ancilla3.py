@@ -46,6 +46,9 @@ def detected_callback():
     with lock: sb.play_audio_file(dong_path)
     operate(text)
 
+def light_callback():
+    operate("toggle light")
+
 def operate(text):
     print("TEXT: " + text)
     split = text.split(' ', 1) #split off the first word
@@ -54,7 +57,9 @@ def operate(text):
             say("What time would you like to wake up?")
             operate("alarm set " + detector.get_stt().lower() + " wake up")
             operate("turn off the light")
-            say("goodnight, handsome")
+            say("goodnight")
+            return
+        elif split[0] == "disregard" or split[0] == "cancel" or split[0] == "nevermind":
             return
         say("Invalid command length")
         return
@@ -64,37 +69,41 @@ def operate(text):
     if toSock == "start" or toSock == "restart":
         restart(command)
         return
-    if toSock not in server.clients.keys():
+    if toSock not in systemdClients.keys():
         toSock = "bluetooth"
-    try: server.sendData(toSock, command)
-    except:
-        say("Problem with " + toSock + " socket. Attempting to restart.")
-        restart(toSock)
+    while (1):
+        try:
+            server.sendData(toSock, command)
+            break
+        except:
+            restart(toSock)
+            say(toSock + " socket error. Restarting.")
 
 def kill(clientSocketOrName):
     deadClient = server.kill(clientSocketOrName)
     say("Successfully killed " + deadClient + " socket")
 
 def restart(clientName):
-    print(clientName)
-    print(server.clients.keys())
-    print(systemdClients.keys())
-    if clientName in server.clients.keys():
-        kill(clientName)
     if clientName not in systemdClients.keys():
         say(clientName + " is not a valid socket name.")
         return
-    print("here")
+    if clientName in server.clients.keys():
+        kill(clientName)
     os.system("sudo systemctl restart " + systemdClients[clientName])
 
 #setup hotword detector
 snowboy_resource_path = "./snowboy/resources/"
 ding_path = snowboy_resource_path + "ding.wav"
 dong_path = snowboy_resource_path + "dong.wav"
-hotword_path = snowboy_resource_path + "models/computer.umdl"
-detector = sb.HotwordDetector(decoder_model=hotword_path, sensitivity=.38, audio_gain=2)
+main_hotword_path = snowboy_resource_path + "models/computer.umdl"
+light_hotword_path = snowboy_resource_path + "models/computer_lights.pmdl"
+detector = sb.HotwordDetector(decoder_model=[main_hotword_path, light_hotword_path],
+                              sensitivity=[.35, .30],
+                              audio_gain=1)
 #setup pyttsx engine
 engine = pyttsx3.init()
+engine.setProperty('voice', 'english+m3')
+engine.setProperty('rate', 170)
 #setup server
 server = Server("/tmp/socket")
 #setup threads
@@ -112,5 +121,5 @@ systemdClients["alarm"] = "ancillaAlarm.service"
 systemdClients["search"] = "ancillaSearch.service"
 
 say("Speech thread waiting")
-detector.wait_for_hotword(detected_callback=detected_callback)
+detector.wait_for_hotword(detected_callback=[detected_callback, light_callback])
 detector.terminate()

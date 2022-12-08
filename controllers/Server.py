@@ -18,7 +18,7 @@ class Server:
             self.thisSocket.bind(self.address)
             print("Server: Bound")
         except:
-            print("Server: Failed to open StreamCollector")
+            print("Server: Failed to bind socket to " + self.address)
 
     def listen(self):
         newClientName = ""
